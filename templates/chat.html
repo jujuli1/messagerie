@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Whatsapp Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <!-- <script src="{{url_for('static', filename='js/socketio.js')}}"></script> -->
+</head>
+<body>
+
+    <!-- Interface messagerie-->
+    <p>List des utilisateur connecté</p>
+    <ul id="listConnected"></ul>
+    <div id="wrapper">
+        <div id="menu">
+            <p> Bienvenue <b id="username">{{username}}</b></p>
+            <p> Current room: <b id="room">{{room}}</b></p>
+        </div>
+
+        <div id="chatbox" style="height: 200px; width: 450px; background-color: aliceblue; overflow-y: auto;">
+
+        </div>
+        <p id="writing"></p>
+        <form id="form" action="">
+            <input id="message" type="test" size="63" />
+            <input id="btn-send" type="submit" size="Send" />
+
+        </form>
+
+    </div>
+    
+</body> 
+
+<script type="text/javascript">
+    var socket = io();
+    // utilisateur en cour et room
+    var currentUser = document.getElementById('username').textContent;
+    var room = document.getElementById('room').textContent;
+
+
+    // si connection réussit, connect est déclenché et emet les info sur l'utilisateur et la chatroom a rejoindre
+    socket.on('connect', function() {
+        socket.emit('join', {'username': currentUser, 'room': room});
+    });
+
+    //recupere le form et le message
+    var form = document.getElementById('form')
+    var input = document.getElementById('message')
+
+    // crée un paragraphe pour stock le msg, lui donne le nom + le message et l'envoit au parent "chatbox"
+    function add_bubble(text, username){
+        var message = document.createElement('p');
+        message.textContent = username + ": " + text;
+        document.getElementById('chatbox').appendChild(message);
+    }
+
+    
+
+    form.addEventListener('submit', function(e){
+        e.preventDefault()
+        if (input.value){
+            socket.emit('chat message', {'username': currentUser, 'message': input.value, 'room': room})
+            add_bubble(input.value, 'Me');
+            input.value = '';
+            const element = document.getElementById('chatbox');
+        }
+    });
+
+    socket.on('chat message', function(msg){
+        add_bubble(msg["message"],msg["username"]);
+        const element = document.getElementById('chatbox');
+        element.scrollTop = element.scrollHeight;
+    })
+
+    socket.on('connected_users', function(data) {
+        var listConnected = document.getElementById('listConnected');
+        listConnected.textContent = "";
+        for (var sid in data) {
+            var connectedUser = document.createElement('li');
+            connectedUser.textContent = data[sid][0];
+            listConnected.appendChild(connectedUser);
+        }
+    });
+</script>
+</html>
