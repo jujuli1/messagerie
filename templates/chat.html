@@ -9,7 +9,7 @@
     <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
-    <!-- <script src="{{url_for('static', filename='js/socketio.js')}}"></script> -->
+    <script src="{{url_for('static', filename='js/socketio.js')}}"></script> 
 </head>
 <body>
 
@@ -59,7 +59,7 @@
         document.getElementById('chatbox').appendChild(message);
     }
 
-    
+
 
     form.addEventListener('submit', function(e){
         e.preventDefault()
